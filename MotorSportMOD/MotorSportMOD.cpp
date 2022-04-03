@@ -6,6 +6,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <set>
 
 void
@@ -52,6 +53,9 @@ generateCreateDrivers() {
 void
 generateTeamDrivers() {
 	const std::string dir = "C:\\Users\\syedr\\OneDrive\\Desktop\\MM_Hacks";
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
 
 	// Read input file
 	rapidcsv::Document input;
@@ -138,8 +142,88 @@ generateTeamDrivers() {
 
 				output.SetCell<float>(qualBonusAmount, i, 0.0f);
 				output.SetCell<float>(raceBonusAmount, i, 0.0f);
-				output.SetCell<std::string>(wagesIndex, i, roundedWages);
-				output.SetCell<std::string>(wagesIndex, i, roundedWages);
+				output.SetCell<std::string>(qualBonusPosition, i, "");
+				output.SetCell<std::string>(raceBonusPosition, i, "");
+			}
+
+			// pay driver
+			{
+				ssize_t payDriverPosition = input.GetColumnIdx("Pay Driver");
+				float r = float(rand()) / RAND_MAX;
+				if (r < 0.1f) {
+					output.SetCell<int32_t>(payDriverPosition, i, 30 * (rand() / RAND_MAX));
+				}
+				else {
+					output.SetCell<int32_t>(payDriverPosition, i, 0);
+				}
+			}
+
+			// Stars
+			// Braking	Cornering	Smoothness	Overtaking	Consistency	Adaptability Fitness Feedback Focus	
+			{
+				static std::vector<std::string> attributes = {
+				"Braking", "Cornering",
+				"Smoothness", "Overtaking",
+				"Consistency", "Adaptability",
+				"Fitness", "Feedback",
+				"Focus" };
+
+				float mean;
+				float sd;
+				ssize_t teamIndex = input.GetColumnIdx("Team");
+				if (!input.GetCell<std::string>(teamIndex, i).empty()) {
+					int32_t teamId = input.GetCell<int32_t>(teamIndex, i);
+					if (teamId <= 11) { // hack:f1
+						mean = 12.0f + (5.0f * (float(rand()) / RAND_MAX));
+						sd = 3.0f;
+					}
+					else if (teamId <= 22) { // hack:f2
+						mean = 8.0f + (5.0f * (float(rand()) / RAND_MAX));
+						sd = 4.0f;
+					}
+					else { // all other nonsense
+						mean = 3.0f + (5.0f * (float(rand()) / RAND_MAX));
+						sd = 5.0f;
+					}
+				}
+				else { // no team
+					mean = (20.0f * (float(rand()) / RAND_MAX));
+					sd = (5.0f * (float(rand()) / RAND_MAX));
+				}
+
+				std::normal_distribution<float> attributeGen(mean, sd);
+				float sum = 0.0f;
+				for (const std::string& attribute : attributes) {
+					float attr = std::min(20.0f, attributeGen(gen));
+					float roundedAttr = int32_t(attr * 100.f) / 100.f;
+					sum += roundedAttr;
+					output.SetCell<int32_t>(input.GetColumnIdx(attribute), i, roundedAttr);
+				}
+				output.SetCell<int32_t>(input.GetColumnIdx(attribute), i, roundedAttr);
+
+				// optimal zone
+				{
+					float zone = 0.5f + 0.5f * (float(rand()) / RAND_MAX);
+					float roundedZone = int32_t(100.f * zone) / 100.0f;
+					output.SetCell<float>(input.GetColumnIdx("Optimal Zone"), i, roundedZone);
+
+					int32_t drivingStyle = 20 + int32_t(80.f * (float(rand()) / RAND_MAX));
+					output.SetCell<int32_t>(input.GetColumnIdx("Driving Style"), i, drivingStyle);
+				}
+
+				// clear history 
+				{
+					output.SetCell<int32_t>(input.GetColumnIdx("Races"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("Wins"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("Podiums"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("Poles"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("DNFs"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("DNFs via error"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("DNS"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("Career Points"), i, 0);
+					output.SetCell<int32_t>(input.GetColumnIdx("Championships"), i, 0);
+					output.SetCell<std::string>(input.GetColumnIdx("Form"), i, "n/a");
+				}
 			}
 		}
 
