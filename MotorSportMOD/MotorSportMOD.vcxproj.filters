@@ -21,12 +21,18 @@
     <ClCompile Include="NamesGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DriverGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Csv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NamesGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

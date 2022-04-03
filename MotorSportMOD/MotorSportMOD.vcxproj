@@ -139,11 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DriverGenerator.cpp" />
     <ClCompile Include="MotorSportMOD.cpp" />
     <ClCompile Include="NamesGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Csv.h" />
+    <ClInclude Include="DriverGenerator.h" />
     <ClInclude Include="NamesGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
