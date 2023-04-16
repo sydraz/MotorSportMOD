@@ -4,10 +4,11 @@ DriverGenerator::DriverGenerator(NameGenerator& names, rapidcsv::Document& trait
 	: names_(names)
 	, gen_(rd_()) {
 
+	std::vector<uint32_t> ids = traits.GetColumn<uint32_t>("ID");
 	std::vector<std::string> type = traits.GetColumn<std::string>("Type");
 	for (uint32_t i = 0; i < type.size(); ++i) {
 		if (type[i] == "Permanent") {
-			permTraitIDs_.push_back(i);
+			permTraitIDs_.push_back(ids[i]);
 		}
 	}
 }

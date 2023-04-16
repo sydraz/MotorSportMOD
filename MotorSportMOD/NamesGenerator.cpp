@@ -18,7 +18,11 @@ NameGeneratorImpl::NameGeneratorImpl(const std::string& lookupPath, const std::s
 	: lookupDoc_(lookupPath)
 	, firstNameDoc_(firstNamePath)
 	, secondNameDoc_(secondNamePath)
-{
+{	
+	fprintf(stderr, "NameGeneratorImpl: %s(%lu x %lu)\n", lookupPath.c_str(), lookupDoc_.GetRowCount(), lookupDoc_.GetColumnCount());
+	fprintf(stderr, "NameGeneratorImpl: %s(%lu x %lu)\n", firstNamePath.c_str(), firstNameDoc_.GetRowCount(), firstNameDoc_.GetColumnCount());
+	fprintf(stderr, "NameGeneratorImpl: %s(%lu x %lu)\n", secondNamePath.c_str(), secondNameDoc_.GetRowCount(), secondNameDoc_.GetColumnCount());
+
 	weightCountry_.reserve(lookupDoc_.GetRowCount());
 	weightStart_.reserve(lookupDoc_.GetRowCount());
 
@@ -34,6 +38,8 @@ NameGenerator::NameInfo NameGeneratorImpl::generate()
 {
 	NameGenerator::NameInfo ret;
 
+	fprintf(stderr, "Generating new name\n");
+
 	// Step 1 : select country
 	int32_t nationIndex = 0;
 	{
@@ -41,6 +47,7 @@ NameGenerator::NameInfo NameGeneratorImpl::generate()
 		auto it = std::lower_bound(weightStart_.begin(), weightStart_.end(), r);
 		nationIndex = std::max<int32_t>(std::distance(weightStart_.begin(), it) - 1, 0);
 		ret.nationality = weightCountry_[nationIndex];
+		fprintf(stderr, "Picked nationality = %s\n", ret.nationality.c_str());
 	}
 
 	// Step 2: select gender, some countries do not have female names so we have to skip those
@@ -55,12 +62,15 @@ NameGenerator::NameInfo NameGeneratorImpl::generate()
 			}
 		}
 		ret.gender = isMale ? "M" : "F";
+		fprintf(stderr, "Picked gender = %s\n", ret.gender.c_str());
 	}
 
 	// Step 3: select first name / last name
 	{
 		int32_t nameStart = isMale ? lookupDoc_.GetColumn<int32_t>("Male Start")[nationIndex] : lookupDoc_.GetColumn<int32_t>("Female Start")[nationIndex];
 		int32_t nameEnd = isMale ? lookupDoc_.GetColumn<int32_t>("Male End")[nationIndex] : lookupDoc_.GetColumn<int32_t>("Female End")[nationIndex];
+
+		fprintf(stderr,"For selection nation, names are in [%d,%d]\n", nameStart, nameEnd);
 
 		int32_t firstNameStart;
 		int32_t firstNameEnd;
@@ -74,6 +84,11 @@ NameGenerator::NameInfo NameGeneratorImpl::generate()
 			firstNameEnd = lookupDoc_.GetColumn<int32_t>("First Name End")[nationIndex];
 		}
 
+		fprintf(stderr, "For selection nation, first names are in [%d,%d]\n", firstNameStart, firstNameEnd);
+
+		fprintf(stderr, "First name dims: %lu x %lu\n", firstNameDoc_.GetRowCount(), firstNameDoc_.GetColumnCount());
+		fprintf(stderr, "Second name dims: %lu x %lu\n", secondNameDoc_.GetRowCount(), secondNameDoc_.GetColumnCount());
+
 		float r1 = float(rand()) / RAND_MAX;
 		int32_t nameIndex = nameStart + int32_t((nameEnd - nameStart) * r1);
 		std::vector<std::string> secondNameRow = secondNameDoc_.GetRow< std::string>(nameIndex);
@@ -84,6 +99,8 @@ NameGenerator::NameInfo NameGeneratorImpl::generate()
 		std::vector<std::string> firstNameRow = firstNameDoc_.GetRow<std::string>(firstNameIndex);
 		ret.firstName = firstNameRow[firstNameDoc_.GetColumnIdx("Name")];
 		ret.ethnicity = firstNameRow[firstNameDoc_.GetColumnIdx("Ethnicity")];
+
+		fprintf(stderr, "First: %s Last : %s Ethnicity:%s\n", ret.firstName.c_str(), ret.lastName.c_str(), ret.ethnicity.c_str());
 
 		// VERIFICATION
 		std::string femaleCol = firstNameRow[firstNameDoc_.GetColumnIdx("Female")];

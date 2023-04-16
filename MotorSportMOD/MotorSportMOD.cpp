@@ -9,17 +9,22 @@
 #include <iostream>
 #include <set>
 
+
+const std::string dir = "C:\\Users\\syedr\\OneDrive\\Desktop\\MM";
+
 void
 generateCreateDrivers() {
-
-	const std::string dir = "C:\\Users\\syedr\\OneDrive\\Desktop\\MM_Hacks";
-
 	// Read input files
 	rapidcsv::Document input;
 	rapidcsv::Document traits;
 	{
+		fprintf(stderr, "Loading %s ...", "create_team_drivers.txt");
 		input.Load(dir + "\\create_team_drivers.txt");
+		fprintf(stderr, "done (%ld x %ld)\n", input.GetRowCount(), input.GetColumnCount());
+
+		fprintf(stderr, "Loading %s ...", "mm_personality_traits.txt");
 		traits.Load(dir + "\\mm_personality_traits.txt");
+		fprintf(stderr, "done (%ld x %ld)\n", traits.GetRowCount(), traits.GetColumnCount());
 	}
 
 	// Create name generator 
@@ -102,8 +107,6 @@ generateCreateDrivers() {
 
 void
 generateTeamDrivers() {
-	const std::string dir = "C:\\Users\\syedr\\OneDrive\\Desktop\\MM_Hacks";
-
 	// Read input files
 	rapidcsv::Document input;
 	rapidcsv::Document traits;
